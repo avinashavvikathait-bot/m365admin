@@ -1,0 +1,1793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>M365 Admin Hub</title>
+<style>
+  :root {
+    --bg: #0d0f14;
+    --bg2: #131720;
+    --bg3: #1a1f2e;
+    --bg4: #1e2535;
+    --border: rgba(99,179,255,0.12);
+    --border2: rgba(99,179,255,0.25);
+    --accent: #3b82f6;
+    --accent2: #60a5fa;
+    --accent-glow: rgba(59,130,246,0.18);
+    --green: #22c55e;
+    --green-bg: rgba(34,197,94,0.1);
+    --red: #ef4444;
+    --red-bg: rgba(239,68,68,0.1);
+    --amber: #f59e0b;
+    --amber-bg: rgba(245,158,11,0.1);
+    --purple: #a855f7;
+    --purple-bg: rgba(168,85,247,0.1);
+    --teal: #14b8a6;
+    --teal-bg: rgba(20,184,166,0.1);
+    --text: #e2e8f0;
+    --text2: #94a3b8;
+    --text3: #64748b;
+    --mono: 'JetBrains Mono', 'Cascadia Code', 'Fira Code', monospace;
+    --sans: 'Inter', system-ui, sans-serif;
+    --radius: 8px;
+    --radius2: 12px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* ── SIDEBAR ── */
+  #sidebar {
+    width: 240px;
+    min-width: 240px;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .sidebar-header {
+    padding: 20px 16px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 4px;
+  }
+
+  .logo-icon {
+    width: 32px; height: 32px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .logo-icon svg { width: 18px; height: 18px; }
+
+  .logo-text {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    color: var(--text);
+  }
+
+  .logo-sub {
+    font-size: 10px;
+    color: var(--text3);
+    font-family: var(--mono);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-left: 42px;
+  }
+
+  #nav-search {
+    margin: 12px 12px 0;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 7px 10px;
+    font-size: 12px;
+    color: var(--text);
+    width: calc(100% - 24px);
+    font-family: var(--sans);
+    outline: none;
+    transition: border-color .2s;
+  }
+  #nav-search::placeholder { color: var(--text3); }
+  #nav-search:focus { border-color: var(--accent); }
+
+  #nav-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 0 8px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--bg4) transparent;
+  }
+
+  .nav-category {
+    padding: 8px 16px 4px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text3);
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 14px;
+    margin: 1px 8px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text2);
+    transition: all .15s;
+    border: 1px solid transparent;
+  }
+
+  .nav-item:hover { background: var(--bg3); color: var(--text); }
+
+  .nav-item.active {
+    background: var(--accent-glow);
+    border-color: rgba(59,130,246,0.3);
+    color: var(--accent2);
+  }
+
+  .nav-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .nav-badge {
+    margin-left: auto;
+    font-size: 10px;
+    background: var(--bg4);
+    padding: 1px 6px;
+    border-radius: 10px;
+    color: var(--text3);
+  }
+
+  .sidebar-footer {
+    padding: 12px;
+    border-top: 1px solid var(--border);
+  }
+
+  .status-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 10px;
+    background: var(--bg3);
+    border-radius: var(--radius);
+    font-size: 11px;
+    color: var(--text2);
+  }
+
+  .status-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%,100% { opacity:1; }
+    50% { opacity:.4; }
+  }
+
+  /* ── MAIN ── */
+  #main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--bg);
+  }
+
+  .topbar {
+    height: 52px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    gap: 12px;
+    background: var(--bg2);
+    flex-shrink: 0;
+  }
+
+  .topbar-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    flex: 1;
+  }
+
+  .topbar-meta {
+    font-size: 11px;
+    color: var(--text3);
+    font-family: var(--mono);
+  }
+
+  .btn {
+    padding: 6px 14px;
+    border-radius: var(--radius);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all .15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--sans);
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+  }
+  .btn-primary:hover { background: #2563eb; }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--text2);
+    border: 1px solid var(--border2);
+  }
+  .btn-ghost:hover { background: var(--bg3); color: var(--text); }
+
+  .btn-danger {
+    background: var(--red-bg);
+    color: var(--red);
+    border: 1px solid rgba(239,68,68,0.25);
+  }
+  .btn-danger:hover { background: rgba(239,68,68,0.2); }
+
+  .btn-success {
+    background: var(--green-bg);
+    color: var(--green);
+    border: 1px solid rgba(34,197,94,0.25);
+  }
+  .btn-success:hover { background: rgba(34,197,94,0.2); }
+
+  .btn:disabled { opacity:.4; cursor:not-allowed; }
+
+  /* ── CONTENT AREA ── */
+  #content {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── PANELS ── */
+  .panel { display: none; flex-direction: column; height: 100%; }
+  .panel.active { display: flex; }
+
+  /* DASHBOARD */
+  .dash-grid {
+    padding: 20px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    flex-shrink: 0;
+  }
+
+  .kpi-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius2);
+    padding: 16px;
+  }
+
+  .kpi-label {
+    font-size: 11px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
+
+  .kpi-value {
+    font-size: 26px;
+    font-weight: 600;
+    font-family: var(--mono);
+    line-height: 1;
+  }
+
+  .kpi-sub {
+    font-size: 11px;
+    color: var(--text3);
+    margin-top: 4px;
+  }
+
+  .recent-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 0 20px;
+    margin-bottom: 10px;
+  }
+
+  .log-feed {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 20px 20px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--bg4) transparent;
+  }
+
+  .log-entry {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 9px 12px;
+    margin-bottom: 4px;
+    background: var(--bg2);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    font-size: 12px;
+  }
+
+  .log-time {
+    font-family: var(--mono);
+    color: var(--text3);
+    font-size: 11px;
+    flex-shrink: 0;
+    padding-top: 1px;
+  }
+
+  .log-msg { color: var(--text2); flex: 1; }
+  .log-msg strong { color: var(--text); font-weight: 500; }
+
+  .tag {
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 5px;
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+  .tag-success { background: var(--green-bg); color: var(--green); }
+  .tag-warning { background: var(--amber-bg); color: var(--amber); }
+  .tag-error { background: var(--red-bg); color: var(--red); }
+  .tag-info { background: var(--accent-glow); color: var(--accent2); }
+
+  /* SCRIPT PANEL */
+  .script-layout {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+  }
+
+  .script-left {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--bg4) transparent;
+    border-right: 1px solid var(--border);
+  }
+
+  .script-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+
+  .script-icon {
+    width: 44px; height: 44px;
+    border-radius: var(--radius2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+
+  .script-meta h2 {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .script-meta p {
+    font-size: 12px;
+    color: var(--text2);
+    line-height: 1.5;
+  }
+
+  .script-file {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text3);
+    background: var(--bg3);
+    padding: 3px 8px;
+    border-radius: 5px;
+    margin-top: 6px;
+    display: inline-block;
+  }
+
+  .params-section h3 {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+  }
+
+  .param-row {
+    margin-bottom: 14px;
+  }
+
+  .param-label {
+    font-size: 12px;
+    color: var(--text2);
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .param-required {
+    font-size: 10px;
+    color: var(--red);
+    font-weight: 500;
+  }
+
+  .param-optional {
+    font-size: 10px;
+    color: var(--text3);
+  }
+
+  .param-input {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 8px 12px;
+    font-size: 13px;
+    color: var(--text);
+    font-family: var(--sans);
+    outline: none;
+    transition: border-color .2s;
+  }
+
+  .param-input:focus { border-color: var(--accent); }
+  .param-input::placeholder { color: var(--text3); }
+
+  select.param-input option { background: var(--bg3); }
+
+  .param-hint {
+    font-size: 11px;
+    color: var(--text3);
+    margin-top: 4px;
+  }
+
+  .dry-run-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: var(--amber-bg);
+    border: 1px solid rgba(245,158,11,0.25);
+    border-radius: var(--radius);
+    margin-bottom: 16px;
+  }
+
+  .dry-run-bar label {
+    font-size: 12px;
+    color: var(--amber);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+  }
+
+  .run-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* OUTPUT PANEL */
+  .script-right {
+    width: 380px;
+    min-width: 300px;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg);
+  }
+
+  .output-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text2);
+    background: var(--bg2);
+  }
+
+  .output-header span { flex: 1; font-weight: 500; }
+
+  #output-console {
+    flex: 1;
+    overflow-y: auto;
+    padding: 14px;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.7;
+    scrollbar-width: thin;
+    scrollbar-color: var(--bg4) transparent;
+  }
+
+  .console-line {
+    padding: 1px 0;
+    word-break: break-all;
+  }
+
+  .console-line.c-info { color: var(--text2); }
+  .console-line.c-success { color: var(--green); }
+  .console-line.c-error { color: var(--red); }
+  .console-line.c-warn { color: var(--amber); }
+  .console-line.c-prompt { color: var(--accent2); }
+  .console-line.c-dim { color: var(--text3); }
+
+  .console-prompt {
+    color: var(--accent2);
+    user-select: none;
+    margin-right: 6px;
+  }
+
+  /* PROGRESS */
+  .progress-bar-wrap {
+    padding: 8px 14px;
+    border-top: 1px solid var(--border);
+    background: var(--bg2);
+  }
+
+  .progress-label {
+    font-size: 11px;
+    color: var(--text3);
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .progress-track {
+    height: 3px;
+    background: var(--bg3);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width .3s;
+    width: 0%;
+  }
+
+  /* DIVIDERS + MISC */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 16px 0;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 5px;
+    font-weight: 500;
+  }
+
+  .badge-identity { background: var(--purple-bg); color: var(--purple); }
+  .badge-exchange { background: var(--accent-glow); color: var(--accent2); }
+  .badge-sharepoint { background: var(--teal-bg); color: var(--teal); }
+  .badge-teams { background: var(--purple-bg); color: var(--purple); }
+  .badge-licensing { background: var(--amber-bg); color: var(--amber); }
+  .badge-security { background: var(--red-bg); color: var(--red); }
+
+  /* EMPTY STATE */
+  .empty-state {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: var(--text3);
+  }
+
+  .empty-icon {
+    font-size: 36px;
+    opacity: .4;
+  }
+
+  .empty-state p { font-size: 13px; }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 3px; }
+
+  /* CHECKBOX */
+  input[type="checkbox"] {
+    accent-color: var(--accent);
+    width: 14px; height: 14px;
+    cursor: pointer;
+  }
+
+  /* RESIZER */
+  .resizer {
+    width: 4px;
+    background: transparent;
+    cursor: col-resize;
+    transition: background .2s;
+  }
+  .resizer:hover { background: var(--accent); }
+
+  /* TOOLTIP */
+  [data-tip] { position: relative; }
+  [data-tip]:hover::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg4);
+    color: var(--text);
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 5px;
+    white-space: nowrap;
+    border: 1px solid var(--border2);
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  /* NOTIFICATION TOAST */
+  #toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--bg4);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius2);
+    padding: 10px 16px;
+    font-size: 13px;
+    color: var(--text);
+    opacity: 0;
+    transform: translateY(8px);
+    transition: all .25s;
+    pointer-events: none;
+    z-index: 9999;
+    max-width: 300px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  #toast.show { opacity: 1; transform: translateY(0); }
+
+  /* CONFIRM MODAL */
+  #modal-backdrop {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
+  #modal-backdrop.show { display: flex; }
+
+  .modal {
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius2);
+    padding: 24px;
+    min-width: 340px;
+    max-width: 420px;
+  }
+
+  .modal h3 { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+  .modal p { font-size: 13px; color: var(--text2); margin-bottom: 16px; line-height: 1.6; }
+
+  .modal-cmd {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 12px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent2);
+    margin-bottom: 16px;
+    word-break: break-all;
+    line-height: 1.6;
+  }
+
+  .modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
+
+  /* HISTORY PANEL */
+  .history-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    margin-bottom: 4px;
+    background: var(--bg2);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: border-color .15s;
+  }
+  .history-item:hover { border-color: var(--border2); }
+  .history-name { font-size: 13px; font-weight: 500; color: var(--text); flex: 1; }
+  .history-ts { font-size: 11px; color: var(--text3); font-family: var(--mono); }
+
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div id="sidebar">
+  <div class="sidebar-header">
+    <div class="logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="1" y="1" width="7" height="7" rx="2" fill="white" opacity=".9"/>
+          <rect x="10" y="1" width="7" height="7" rx="2" fill="white" opacity=".6"/>
+          <rect x="1" y="10" width="7" height="7" rx="2" fill="white" opacity=".6"/>
+          <rect x="10" y="10" width="7" height="7" rx="2" fill="white" opacity=".9"/>
+        </svg>
+      </div>
+      <span class="logo-text">M365 Admin Hub</span>
+    </div>
+    <div class="logo-sub">PowerShell Automation</div>
+  </div>
+
+  <input type="text" id="nav-search" placeholder="Search modules..." oninput="filterNav(this.value)">
+
+  <div id="nav-list"></div>
+
+  <div class="sidebar-footer">
+    <div class="status-bar">
+      <div class="status-dot"></div>
+      <span>Connected · Exchange Online</span>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+  <div class="topbar">
+    <span class="topbar-title" id="topbar-title">Dashboard</span>
+    <span class="topbar-meta" id="topbar-meta">M365 Admin Hub v1.0</span>
+    <button class="btn btn-ghost" onclick="openPanel('history')" data-tip="Run History">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>
+      History
+    </button>
+    <button class="btn btn-ghost" onclick="openPanel('settings')" data-tip="Settings">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 0-14.14 0M4.93 19.07a10 10 0 0 0 14.14 0"/></svg>
+    </button>
+  </div>
+
+  <div id="content">
+
+    <!-- DASHBOARD PANEL -->
+    <div class="panel active" id="panel-dashboard">
+      <div class="dash-grid">
+        <div class="kpi-card">
+          <div class="kpi-label">Scripts Available</div>
+          <div class="kpi-value" id="kpi-scripts" style="color:var(--accent2)">0</div>
+          <div class="kpi-sub">across all categories</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Runs Today</div>
+          <div class="kpi-value" id="kpi-runs" style="color:var(--green)">0</div>
+          <div class="kpi-sub">executions</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Successful</div>
+          <div class="kpi-value" id="kpi-success" style="color:var(--green)">0</div>
+          <div class="kpi-sub" id="kpi-success-pct">— success rate</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Errors</div>
+          <div class="kpi-value" id="kpi-errors" style="color:var(--red)">0</div>
+          <div class="kpi-sub">need attention</div>
+        </div>
+      </div>
+      <div class="recent-title">Recent Activity</div>
+      <div class="log-feed" id="dash-log">
+        <div class="log-entry">
+          <span class="log-time">--:--:--</span>
+          <span class="log-msg">M365 Admin Hub initialised. <strong>Select a module</strong> from the sidebar to begin.</span>
+          <span class="tag tag-info">READY</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCRIPT RUNNER PANEL -->
+    <div class="panel" id="panel-script">
+      <div class="script-layout">
+        <div class="script-left" id="script-form-area">
+          <div class="script-header" id="script-header-area"></div>
+          <div class="dry-run-bar">
+            <label>
+              <input type="checkbox" id="dry-run-chk" checked>
+              Dry Run Mode — commands will be previewed but NOT executed
+            </label>
+          </div>
+          <div class="params-section">
+            <h3>Parameters</h3>
+            <div id="params-form"></div>
+          </div>
+          <div class="run-actions">
+            <button class="btn btn-primary" onclick="runScript()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+              Run Script
+            </button>
+            <button class="btn btn-ghost" onclick="clearOutput()">Clear Output</button>
+            <button class="btn btn-ghost" onclick="copyOutput()">Copy Log</button>
+          </div>
+        </div>
+        <div class="resizer" id="resizer"></div>
+        <div class="script-right">
+          <div class="output-header">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="color:var(--green)"><circle cx="12" cy="12" r="6"/></svg>
+            <span>PowerShell Output</span>
+            <span id="output-status" style="font-size:11px;color:var(--text3)">idle</span>
+          </div>
+          <div id="output-console">
+            <div class="console-line c-dim">── M365 Admin Hub Terminal ──</div>
+            <div class="console-line c-dim">Ready. Configure parameters and click Run Script.</div>
+          </div>
+          <div class="progress-bar-wrap" id="progress-wrap" style="display:none">
+            <div class="progress-label">
+              <span id="progress-label-text">Running...</span>
+              <span id="progress-pct">0%</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill" id="progress-fill"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HISTORY PANEL -->
+    <div class="panel" id="panel-history">
+      <div style="padding:20px;flex:1;overflow-y:auto">
+        <div style="font-size:13px;color:var(--text2);margin-bottom:16px;display:flex;align-items:center;justify-content:space-between">
+          <span style="font-weight:600;color:var(--text)">Run History</span>
+          <button class="btn btn-ghost" onclick="clearHistory()" style="font-size:11px">Clear All</button>
+        </div>
+        <div id="history-list"></div>
+      </div>
+    </div>
+
+    <!-- SETTINGS PANEL -->
+    <div class="panel" id="panel-settings">
+      <div style="padding:24px;max-width:580px">
+        <div style="font-size:16px;font-weight:600;margin-bottom:6px">Settings</div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:24px">Configure environment and execution preferences</div>
+
+        <div style="display:grid;gap:14px">
+          <div class="param-row">
+            <div class="param-label">PowerShell Executable Path</div>
+            <input class="param-input" id="set-ps-path" value="pwsh" placeholder="pwsh or C:\Program Files\PowerShell\7\pwsh.exe">
+            <div class="param-hint">Use <code style="color:var(--accent2)">pwsh</code> for PS 7+ (recommended) or <code style="color:var(--accent2)">powershell</code> for Windows PS 5.1</div>
+          </div>
+          <div class="param-row">
+            <div class="param-label">Scripts Root Directory</div>
+            <input class="param-input" id="set-scripts-dir" value=".\scripts\" placeholder="Relative or absolute path">
+            <div class="param-hint">All .ps1 files resolved relative to this path</div>
+          </div>
+          <div class="param-row">
+            <div class="param-label">Execution Policy</div>
+            <select class="param-input" id="set-exec-policy">
+              <option value="Bypass">Bypass</option>
+              <option value="RemoteSigned" selected>RemoteSigned</option>
+              <option value="Unrestricted">Unrestricted</option>
+              <option value="AllSigned">AllSigned</option>
+            </select>
+          </div>
+          <div class="param-row">
+            <div class="param-label">Default: Dry Run Mode</div>
+            <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);cursor:pointer">
+              <input type="checkbox" id="set-dry-run" checked>
+              Always enable dry run on new script load
+            </label>
+          </div>
+          <div class="param-row">
+            <div class="param-label">M365 Tenant Domain</div>
+            <input class="param-input" id="set-tenant" placeholder="yourtenant.onmicrosoft.com">
+          </div>
+        </div>
+
+        <div class="divider"></div>
+        <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- CONFIRM MODAL -->
+<div id="modal-backdrop">
+  <div class="modal">
+    <h3 id="modal-title">Confirm Execution</h3>
+    <p id="modal-body">You are about to run this script in LIVE mode. This action may modify tenant data.</p>
+    <div class="modal-cmd" id="modal-cmd"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-danger" id="modal-confirm-btn" onclick="confirmRun()">Run Live</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+// ──────────────────────────────────────────────
+//  SCRIPT REGISTRY
+//  To add new scripts: push a new entry to MODULES array below.
+//  Each module auto-creates a nav item and form UI.
+// ──────────────────────────────────────────────
+const MODULES = [
+  {
+    id: 'dashboard',
+    label: 'Dashboard',
+    category: 'Overview',
+    icon: '⬛',
+    color: 'var(--accent2)',
+    bg: 'var(--accent-glow)',
+    special: 'dashboard'
+  },
+
+  // ── IDENTITY / AZURE AD ──
+  {
+    id: 'create-user',
+    label: 'Create User',
+    category: 'Identity / AAD',
+    icon: '👤',
+    color: 'var(--purple)',
+    bg: 'var(--purple-bg)',
+    badge: 'identity',
+    script: 'Create-M365User.ps1',
+    description: 'Creates a new Azure AD / Entra ID user account with optional licence assignment and group membership.',
+    params: [
+      { id: 'DisplayName',    label: 'Display Name',       type: 'text',     required: true,  placeholder: 'Jane Smith',            hint: 'Full name as shown in GAL' },
+      { id: 'UPN',            label: 'User Principal Name',type: 'text',     required: true,  placeholder: 'jane.smith@contoso.com', hint: 'Must match verified domain' },
+      { id: 'Password',       label: 'Temp Password',      type: 'password', required: true,  placeholder: 'P@ssw0rd!',             hint: 'User will be prompted to change on first login' },
+      { id: 'Department',     label: 'Department',         type: 'text',     required: false, placeholder: 'IT Operations' },
+      { id: 'JobTitle',       label: 'Job Title',          type: 'text',     required: false, placeholder: 'IT Associate' },
+      { id: 'LicenseSKU',     label: 'Licence SKU',        type: 'select',   required: false,
+        options: ['None','Microsoft 365 E3','Microsoft 365 E5','Microsoft 365 Business Standard','Exchange Online Plan 1','Exchange Online Plan 2'],
+        hint: 'Assign a licence immediately on creation'
+      },
+      { id: 'ForceChangePwd', label: 'Force password change on login', type: 'checkbox', required: false, default: true }
+    ]
+  },
+  {
+    id: 'disable-user',
+    label: 'Disable / Offboard User',
+    category: 'Identity / AAD',
+    icon: '🚫',
+    color: 'var(--red)',
+    bg: 'var(--red-bg)',
+    badge: 'identity',
+    script: 'Disable-M365User.ps1',
+    description: 'Disables a user account, revokes active sessions, removes group memberships, and optionally converts the mailbox to shared.',
+    params: [
+      { id: 'UPN',            label: 'User Principal Name', type: 'text',     required: true, placeholder: 'jane.smith@contoso.com' },
+      { id: 'ConvertShared',  label: 'Convert mailbox to Shared', type: 'checkbox', required: false, default: false, hint: 'Preserves email access for delegated accounts' },
+      { id: 'RemoveLicences', label: 'Remove all licences', type: 'checkbox', required: false, default: true },
+      { id: 'RevokeTokens',   label: 'Revoke all active sessions', type: 'checkbox', required: false, default: true }
+    ]
+  },
+  {
+    id: 'reset-mfa',
+    label: 'Reset MFA Methods',
+    category: 'Identity / AAD',
+    icon: '🔐',
+    color: 'var(--purple)',
+    bg: 'var(--purple-bg)',
+    badge: 'identity',
+    script: 'Reset-MFAMethods.ps1',
+    description: 'Clears all registered MFA authentication methods for a user, forcing re-registration on next login.',
+    params: [
+      { id: 'UPN',     label: 'User Principal Name', type: 'text', required: true,  placeholder: 'jane.smith@contoso.com' },
+      { id: 'Method',  label: 'Clear specific method', type: 'select', required: false,
+        options: ['All Methods','Authenticator App','Phone (SMS)','Email OTP','FIDO2 Key','Software OATH Token']
+      }
+    ]
+  },
+
+  // ── EXCHANGE ONLINE ──
+  {
+    id: 'mailbox-audit',
+    label: 'Mailbox Audit Log',
+    category: 'Exchange Online',
+    icon: '📧',
+    color: 'var(--accent2)',
+    bg: 'var(--accent-glow)',
+    badge: 'exchange',
+    script: 'Get-MailboxAuditLog.ps1',
+    description: 'Retrieves mailbox audit log entries for a specified user within a date range. Exports to CSV.',
+    params: [
+      { id: 'UserPrincipalName', label: 'Mailbox (UPN)',  type: 'text', required: true, placeholder: 'jane.smith@contoso.com' },
+      { id: 'StartDate',         label: 'Start Date',    type: 'date', required: true },
+      { id: 'EndDate',           label: 'End Date',      type: 'date', required: true },
+      { id: 'Operations',        label: 'Filter Operations', type: 'select', required: false,
+        options: ['All','HardDelete','SoftDelete','Send','SendOnBehalf','SendAs','MoveToDeletedItems','Copy','FolderBind']
+      },
+      { id: 'ExportCSV',   label: 'Export results to CSV', type: 'checkbox', required: false, default: true }
+    ]
+  },
+  {
+    id: 'mailbox-perm',
+    label: 'Mailbox Permissions',
+    category: 'Exchange Online',
+    icon: '🔑',
+    color: 'var(--accent2)',
+    bg: 'var(--accent-glow)',
+    badge: 'exchange',
+    script: 'Set-MailboxPermissions.ps1',
+    description: 'Grant or revoke Full Access, Send As, or Send on Behalf permissions between mailboxes.',
+    params: [
+      { id: 'TargetMailbox', label: 'Target Mailbox (UPN)',   type: 'text',   required: true, placeholder: 'shared@contoso.com' },
+      { id: 'TrusteeUPN',    label: 'Trustee User (UPN)',     type: 'text',   required: true, placeholder: 'jane.smith@contoso.com' },
+      { id: 'Permission',    label: 'Permission Type',        type: 'select', required: true,
+        options: ['FullAccess','SendAs','SendOnBehalf']
+      },
+      { id: 'Action',        label: 'Action',                 type: 'select', required: true,
+        options: ['Grant','Revoke']
+      },
+      { id: 'AutoMap',       label: 'AutoMap mailbox in Outlook', type: 'checkbox', required: false, default: true }
+    ]
+  },
+  {
+    id: 'oof-set',
+    label: 'Set Out-of-Office',
+    category: 'Exchange Online',
+    icon: '✈️',
+    color: 'var(--accent2)',
+    bg: 'var(--accent-glow)',
+    badge: 'exchange',
+    script: 'Set-OutOfOffice.ps1',
+    description: 'Configure automatic reply (Out of Office) settings for any mailbox, including scheduled windows.',
+    params: [
+      { id: 'UPN',              label: 'Mailbox (UPN)', type: 'text',     required: true, placeholder: 'jane.smith@contoso.com' },
+      { id: 'State',            label: 'OOF State',     type: 'select',   required: true,  options: ['Enabled','Disabled','Scheduled'] },
+      { id: 'InternalMessage',  label: 'Internal Message', type: 'textarea', required: false, placeholder: 'I am currently out of office...' },
+      { id: 'ExternalMessage',  label: 'External Message', type: 'textarea', required: false, placeholder: 'Thank you for your email...' },
+      { id: 'StartDateTime',    label: 'Schedule Start', type: 'datetime-local', required: false },
+      { id: 'EndDateTime',      label: 'Schedule End',   type: 'datetime-local', required: false }
+    ]
+  },
+
+  // ── SHAREPOINT / ONEDRIVE ──
+  {
+    id: 'sp-site-create',
+    label: 'Create SharePoint Site',
+    category: 'SharePoint / OneDrive',
+    icon: '🗄️',
+    color: 'var(--teal)',
+    bg: 'var(--teal-bg)',
+    badge: 'sharepoint',
+    script: 'New-SPOSite.ps1',
+    description: 'Provisions a new SharePoint Online site collection with specified template, owners, and storage quota.',
+    params: [
+      { id: 'SiteTitle',    label: 'Site Title',    type: 'text',   required: true,  placeholder: 'HR Documents' },
+      { id: 'SiteAlias',    label: 'Site Alias',    type: 'text',   required: true,  placeholder: 'hr-documents', hint: 'URL slug — lowercase, no spaces' },
+      { id: 'SiteType',     label: 'Site Template', type: 'select', required: true,
+        options: ['Team Site (no M365 Group)','Communication Site','Team Site (M365 Group)','Document Center']
+      },
+      { id: 'Owner',        label: 'Primary Owner', type: 'text',   required: true,  placeholder: 'admin@contoso.com' },
+      { id: 'StorageQuota', label: 'Storage Quota (MB)', type: 'number', required: false, placeholder: '1024' }
+    ]
+  },
+  {
+    id: 'od-quota',
+    label: 'Set OneDrive Quota',
+    category: 'SharePoint / OneDrive',
+    icon: '💾',
+    color: 'var(--teal)',
+    bg: 'var(--teal-bg)',
+    badge: 'sharepoint',
+    script: 'Set-OneDriveQuota.ps1',
+    description: 'Adjusts the storage quota for a user\'s OneDrive for Business.',
+    params: [
+      { id: 'UPN',        label: 'User (UPN)',       type: 'text',   required: true,  placeholder: 'jane.smith@contoso.com' },
+      { id: 'QuotaGB',    label: 'New Quota (GB)',   type: 'number', required: true,  placeholder: '5120', hint: 'Default is 1024 GB for E3/E5 users' },
+      { id: 'WarningGB',  label: 'Warning Threshold (GB)', type: 'number', required: false, placeholder: '4608' }
+    ]
+  },
+
+  // ── MICROSOFT TEAMS ──
+  {
+    id: 'teams-new',
+    label: 'Create Team',
+    category: 'Microsoft Teams',
+    icon: '💬',
+    color: 'var(--purple)',
+    bg: 'var(--purple-bg)',
+    badge: 'teams',
+    script: 'New-Team.ps1',
+    description: 'Creates a new Microsoft Team with initial owners and members, and optional channel setup.',
+    params: [
+      { id: 'TeamName',     label: 'Team Name',        type: 'text',   required: true,  placeholder: 'Project Phoenix' },
+      { id: 'Description',  label: 'Description',      type: 'textarea',required: false, placeholder: 'Cross-functional project team...' },
+      { id: 'Visibility',   label: 'Visibility',       type: 'select', required: true,   options: ['Private','Public','Org-Wide'] },
+      { id: 'Owner',        label: 'Owner (UPN)',       type: 'text',   required: true,   placeholder: 'pm@contoso.com' },
+      { id: 'Members',      label: 'Initial Members',  type: 'text',   required: false,  placeholder: 'user1@c.com, user2@c.com', hint: 'Comma-separated UPNs' }
+    ]
+  },
+  {
+    id: 'teams-policy',
+    label: 'Assign Teams Policy',
+    category: 'Microsoft Teams',
+    icon: '📋',
+    color: 'var(--purple)',
+    bg: 'var(--purple-bg)',
+    badge: 'teams',
+    script: 'Assign-TeamsPolicy.ps1',
+    description: 'Assigns a Teams meeting, messaging, or calling policy to a user or batch of users.',
+    params: [
+      { id: 'UPN',        label: 'User(s) (UPN)',    type: 'text',   required: true,  placeholder: 'jane@c.com or CSV path', hint: 'Single UPN or path to .csv with UPN column' },
+      { id: 'PolicyType', label: 'Policy Type',      type: 'select', required: true,  options: ['MeetingPolicy','MessagingPolicy','CallingPolicy','AppPermissionPolicy','LiveEventsPolicy'] },
+      { id: 'PolicyName', label: 'Policy Name',      type: 'text',   required: true,  placeholder: 'AllOff' }
+    ]
+  },
+
+  // ── LICENSING ──
+  {
+    id: 'assign-licence',
+    label: 'Assign Licence',
+    category: 'Licensing',
+    icon: '🏷️',
+    color: 'var(--amber)',
+    bg: 'var(--amber-bg)',
+    badge: 'licensing',
+    script: 'Set-UserLicence.ps1',
+    description: 'Assigns or removes Microsoft 365 licences for a user, with optional service plan disable list.',
+    params: [
+      { id: 'UPN',            label: 'User (UPN)',      type: 'text',   required: true, placeholder: 'jane.smith@contoso.com' },
+      { id: 'LicenceSKU',     label: 'Licence SKU',     type: 'select', required: true, options: ['Microsoft 365 E3','Microsoft 365 E5','Microsoft 365 Business Standard','Exchange Online Plan 1','Exchange Online Plan 2','Teams Essentials','Power BI Pro','Visio Plan 2'] },
+      { id: 'Action',         label: 'Action',          type: 'select', required: true, options: ['Assign','Remove'] },
+      { id: 'DisabledPlans',  label: 'Disable Service Plans', type: 'text', required: false, placeholder: 'YAMMER_ENTERPRISE, SWAY', hint: 'Comma-separated plan names to disable within SKU' }
+    ]
+  },
+  {
+    id: 'licence-report',
+    label: 'Licence Usage Report',
+    category: 'Licensing',
+    icon: '📊',
+    color: 'var(--amber)',
+    bg: 'var(--amber-bg)',
+    badge: 'licensing',
+    script: 'Get-LicenceReport.ps1',
+    description: 'Generates a full licence utilisation report including assigned, available, and over-allocated SKUs.',
+    params: [
+      { id: 'OutputFormat', label: 'Output Format', type: 'select', required: true,  options: ['Console','CSV Export','HTML Report','JSON'] },
+      { id: 'OutputPath',   label: 'Export Path',   type: 'text',   required: false, placeholder: 'C:\\Reports\\', hint: 'Required for CSV, HTML, JSON formats' },
+      { id: 'IncludeDisabled', label: 'Include disabled users', type: 'checkbox', required: false, default: false }
+    ]
+  },
+
+  // ── SECURITY ──
+  {
+    id: 'conditional-access',
+    label: 'List Conditional Access',
+    category: 'Security',
+    icon: '🛡️',
+    color: 'var(--red)',
+    bg: 'var(--red-bg)',
+    badge: 'security',
+    script: 'Get-ConditionalAccessPolicies.ps1',
+    description: 'Retrieves all Conditional Access policies and their states. Optionally exports to structured report.',
+    params: [
+      { id: 'FilterState',  label: 'Policy State Filter', type: 'select', required: false, options: ['All','Enabled','Disabled','EnabledForReportingButNotEnforced'] },
+      { id: 'ExportReport', label: 'Export to HTML report', type: 'checkbox', required: false, default: false }
+    ]
+  },
+  {
+    id: 'signin-logs',
+    label: 'Sign-In Risk Report',
+    category: 'Security',
+    icon: '⚠️',
+    color: 'var(--red)',
+    bg: 'var(--red-bg)',
+    badge: 'security',
+    script: 'Get-RiskySignIns.ps1',
+    description: 'Exports risky sign-in events from Entra ID Identity Protection within a specified window.',
+    params: [
+      { id: 'RiskLevel',  label: 'Minimum Risk Level', type: 'select', required: true,  options: ['Low','Medium','High','HiddenMembership'] },
+      { id: 'StartDate',  label: 'Start Date',         type: 'date',   required: true },
+      { id: 'EndDate',    label: 'End Date',           type: 'date',   required: true },
+      { id: 'UPN',        label: 'Filter by User (optional)', type: 'text', required: false, placeholder: 'jane@contoso.com' }
+    ]
+  }
+];
+
+// ──────────────────────────────────────────────
+//  APP STATE
+// ──────────────────────────────────────────────
+let activeModuleId = 'dashboard';
+let pendingRunData = null;
+let runHistory = JSON.parse(localStorage.getItem('m365hub_history') || '[]');
+let stats = JSON.parse(localStorage.getItem('m365hub_stats') || '{"runs":0,"success":0,"errors":0}');
+
+// ──────────────────────────────────────────────
+//  INIT
+// ──────────────────────────────────────────────
+function init() {
+  buildNav();
+  updateKPIs();
+  renderHistory();
+  setNavActive('dashboard');
+  document.getElementById('kpi-scripts').textContent = MODULES.filter(m => m.script).length;
+}
+
+// ──────────────────────────────────────────────
+//  NAV BUILD
+// ──────────────────────────────────────────────
+function buildNav(filter = '') {
+  const list = document.getElementById('nav-list');
+  list.innerHTML = '';
+
+  const cats = {};
+  MODULES.forEach(m => {
+    const cat = m.category || 'Overview';
+    if (!cats[cat]) cats[cat] = [];
+    if (!filter || m.label.toLowerCase().includes(filter.toLowerCase())) {
+      cats[cat].push(m);
+    }
+  });
+
+  for (const cat in cats) {
+    if (!cats[cat].length) continue;
+    const catEl = document.createElement('div');
+    catEl.className = 'nav-category';
+    catEl.textContent = cat;
+    list.appendChild(catEl);
+
+    cats[cat].forEach(m => {
+      const item = document.createElement('div');
+      item.className = 'nav-item' + (m.id === activeModuleId ? ' active' : '');
+      item.id = 'nav-' + m.id;
+      item.innerHTML = `
+        <div class="nav-dot" style="background:${m.color}"></div>
+        <span>${m.label}</span>
+      `;
+      item.onclick = () => loadModule(m.id);
+      list.appendChild(item);
+    });
+  }
+}
+
+function filterNav(val) { buildNav(val); }
+
+function setNavActive(id) {
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  const el = document.getElementById('nav-' + id);
+  if (el) el.classList.add('active');
+}
+
+// ──────────────────────────────────────────────
+//  LOAD MODULE
+// ──────────────────────────────────────────────
+function loadModule(id) {
+  activeModuleId = id;
+  setNavActive(id);
+
+  const m = MODULES.find(x => x.id === id);
+  if (!m) return;
+
+  document.getElementById('topbar-title').textContent = m.label;
+  document.getElementById('topbar-meta').textContent = m.script || 'M365 Admin Hub';
+
+  if (m.special === 'dashboard') {
+    openPanel('dashboard');
+    return;
+  }
+
+  openPanel('script');
+  renderScriptForm(m);
+  resetOutput();
+}
+
+function openPanel(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  if (name === 'history') renderHistory();
+}
+
+// ──────────────────────────────────────────────
+//  SCRIPT FORM RENDERER
+// ──────────────────────────────────────────────
+function renderScriptForm(m) {
+  const headerArea = document.getElementById('script-header-area');
+  headerArea.innerHTML = `
+    <div class="script-icon" style="background:${m.bg}; color:${m.color}">${m.icon}</div>
+    <div class="script-meta">
+      <h2>${m.label}</h2>
+      <p>${m.description || ''}</p>
+      ${m.badge ? `<div style="margin-top:8px"><span class="badge badge-${m.badge}">${m.category}</span></div>` : ''}
+      <div class="script-file">${m.script}</div>
+    </div>
+  `;
+
+  const form = document.getElementById('params-form');
+  form.innerHTML = '';
+
+  if (!m.params || !m.params.length) {
+    form.innerHTML = '<div style="font-size:12px;color:var(--text3)">No parameters required for this script.</div>';
+    return;
+  }
+
+  m.params.forEach(p => {
+    const row = document.createElement('div');
+    row.className = 'param-row';
+
+    const reqTag = p.required
+      ? '<span class="param-required">required</span>'
+      : '<span class="param-optional">optional</span>';
+
+    let inputHTML = '';
+    if (p.type === 'select') {
+      const opts = p.options.map(o => `<option value="${o}">${o}</option>`).join('');
+      inputHTML = `<select class="param-input" id="param-${p.id}" data-param="${p.id}">${opts}</select>`;
+    } else if (p.type === 'checkbox') {
+      const checked = p.default ? 'checked' : '';
+      inputHTML = `
+        <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);cursor:pointer;margin-top:4px">
+          <input type="checkbox" id="param-${p.id}" data-param="${p.id}" ${checked}>
+          ${p.hint || 'Enable'}
+        </label>`;
+    } else if (p.type === 'textarea') {
+      inputHTML = `<textarea class="param-input" id="param-${p.id}" data-param="${p.id}" rows="3" placeholder="${p.placeholder || ''}" style="resize:vertical;font-family:var(--sans)"></textarea>`;
+    } else {
+      inputHTML = `<input class="param-input" type="${p.type}" id="param-${p.id}" data-param="${p.id}" placeholder="${p.placeholder || ''}">`;
+    }
+
+    row.innerHTML = `
+      <div class="param-label">${p.label} ${reqTag}</div>
+      ${inputHTML}
+      ${p.hint && p.type !== 'checkbox' ? `<div class="param-hint">${p.hint}</div>` : ''}
+    `;
+    form.appendChild(row);
+  });
+
+  // Apply dry-run default from settings
+  const defDry = document.getElementById('set-dry-run');
+  if (defDry) document.getElementById('dry-run-chk').checked = defDry.checked;
+}
+
+// ──────────────────────────────────────────────
+//  RUN SCRIPT
+// ──────────────────────────────────────────────
+function runScript() {
+  const m = MODULES.find(x => x.id === activeModuleId);
+  if (!m || !m.script) return;
+
+  const isDryRun = document.getElementById('dry-run-chk').checked;
+  const params = collectParams(m);
+  if (!params) return;
+
+  const cmd = buildCommand(m, params, isDryRun);
+
+  if (!isDryRun) {
+    pendingRunData = { m, params, cmd };
+    document.getElementById('modal-title').textContent = `⚠️ Live Execution: ${m.label}`;
+    document.getElementById('modal-body').textContent = `You are about to run this script in LIVE mode against your Microsoft 365 tenant. This may create, modify, or delete data.`;
+    document.getElementById('modal-cmd').textContent = cmd;
+    document.getElementById('modal-backdrop').classList.add('show');
+    return;
+  }
+
+  executeSimulated(m, params, cmd, isDryRun);
+}
+
+function collectParams(m) {
+  if (!m.params) return {};
+  const out = {};
+  for (const p of m.params) {
+    const el = document.getElementById('param-' + p.id);
+    if (!el) continue;
+    const val = p.type === 'checkbox' ? el.checked : el.value.trim();
+    if (p.required && !val && p.type !== 'checkbox') {
+      toast(`⚠️ Required: ${p.label}`, 'warn');
+      el.focus();
+      return null;
+    }
+    out[p.id] = val;
+  }
+  return out;
+}
+
+function buildCommand(m, params, isDryRun) {
+  const psPath = document.getElementById('set-ps-path')?.value || 'pwsh';
+  const dir = document.getElementById('set-scripts-dir')?.value || '.\\scripts\\';
+  const policy = document.getElementById('set-exec-policy')?.value || 'RemoteSigned';
+
+  let paramStr = Object.entries(params)
+    .filter(([k, v]) => v !== '' && v !== false)
+    .map(([k, v]) => {
+      if (v === true) return `-${k}`;
+      if (typeof v === 'string' && v.includes(' ')) return `-${k} "${v}"`;
+      return `-${k} ${v}`;
+    }).join(' ');
+
+  const dryFlag = isDryRun ? ' -WhatIf' : '';
+  return `${psPath} -ExecutionPolicy ${policy} -File "${dir}${m.script}" ${paramStr}${dryFlag}`.trim();
+}
+
+function confirmRun() {
+  closeModal();
+  if (!pendingRunData) return;
+  const { m, params, cmd } = pendingRunData;
+  pendingRunData = null;
+  executeSimulated(m, params, cmd, false);
+}
+
+function closeModal() {
+  document.getElementById('modal-backdrop').classList.remove('show');
+}
+
+// ──────────────────────────────────────────────
+//  SIMULATED EXECUTION ENGINE
+// ──────────────────────────────────────────────
+function executeSimulated(m, params, cmd, isDryRun) {
+  const console_ = document.getElementById('output-console');
+  const progWrap = document.getElementById('progress-wrap');
+  const progFill = document.getElementById('progress-fill');
+  const progLabel = document.getElementById('progress-label-text');
+  const progPct = document.getElementById('progress-pct');
+  const statusEl = document.getElementById('output-status');
+
+  console_.innerHTML = '';
+  progWrap.style.display = 'block';
+  progFill.style.width = '0%';
+  statusEl.textContent = isDryRun ? 'dry-run' : 'running';
+  statusEl.style.color = isDryRun ? 'var(--amber)' : 'var(--green)';
+
+  const lines = buildSimLines(m, params, isDryRun, cmd);
+  let i = 0;
+  let pct = 0;
+
+  function appendLine(line) {
+    const el = document.createElement('div');
+    el.className = 'console-line ' + line.cls;
+    el.innerHTML = line.text;
+    console_.appendChild(el);
+    console_.scrollTop = console_.scrollHeight;
+  }
+
+  function step() {
+    if (i >= lines.length) {
+      progFill.style.width = '100%';
+      progLabel.textContent = 'Complete';
+      progPct.textContent = '100%';
+      statusEl.textContent = isDryRun ? 'dry-run complete' : 'complete';
+      statusEl.style.color = 'var(--green)';
+
+      // Update stats
+      stats.runs++;
+      if (lines.some(l => l.cls === 'c-error')) stats.errors++;
+      else stats.success++;
+      localStorage.setItem('m365hub_stats', JSON.stringify(stats));
+
+      // Log to history
+      const entry = {
+        id: Date.now(),
+        script: m.script,
+        label: m.label,
+        ts: new Date().toISOString(),
+        dryRun: isDryRun,
+        success: !lines.some(l => l.cls === 'c-error'),
+        cmd
+      };
+      runHistory.unshift(entry);
+      if (runHistory.length > 100) runHistory.pop();
+      localStorage.setItem('m365hub_history', JSON.stringify(runHistory));
+
+      updateKPIs();
+      addDashLog(m, isDryRun, entry.success);
+      toast(isDryRun ? `✓ Dry run complete: ${m.label}` : `✓ Script complete: ${m.label}`, 'success');
+      return;
+    }
+
+    const line = lines[i++];
+    appendLine(line);
+
+    pct = Math.min(99, Math.round((i / lines.length) * 100));
+    progFill.style.width = pct + '%';
+    progPct.textContent = pct + '%';
+    if (line.label) progLabel.textContent = line.label;
+
+    const delay = line.delay || (Math.random() * 120 + 40);
+    setTimeout(step, delay);
+  }
+
+  step();
+}
+
+function buildSimLines(m, params, isDryRun, cmd) {
+  const now = () => new Date().toLocaleTimeString();
+  const dryTag = isDryRun ? '[DRY RUN] ' : '';
+  const lines = [];
+
+  const push = (text, cls = 'c-info', delay = null, label = null) => lines.push({ text, cls, delay, label });
+
+  push(`<span class="console-prompt">PS &gt;</span>${cmd}`, 'c-prompt', 80);
+  push('', 'c-dim', 30);
+  push(`${now()} ─ Starting: <strong>${m.label}</strong>`, 'c-info', 60, 'Connecting...');
+  push(`${now()} ─ Connecting to Microsoft Graph...`, 'c-dim', 300);
+  push(`${now()} ─ Authentication: Managed Identity`, 'c-dim', 250);
+  push(`${now()} ─ Connection established ✓`, 'c-success', 400, 'Validating...');
+
+  if (isDryRun) push(`${now()} ─ ⚠ DRY RUN MODE: No changes will be made to tenant`, 'c-warn', 60);
+
+  push('', 'c-dim', 20);
+  push(`${now()} ─ Validating parameters...`, 'c-dim', 200);
+
+  const paramPairs = Object.entries(params).filter(([k, v]) => v !== '' && v !== false);
+  paramPairs.forEach(([k, v]) => {
+    push(`   ${k}: ${v === true ? '[enabled]' : v}`, 'c-dim', 80);
+  });
+
+  push(`${now()} ─ Parameters valid ✓`, 'c-success', 150, 'Executing...');
+  push('', 'c-dim', 20);
+
+  // Script-specific fake output
+  const simOutputs = getSimOutput(m.id, params, isDryRun, dryTag, now);
+  simOutputs.forEach(l => push(l.text, l.cls, l.delay, l.label));
+
+  push('', 'c-dim', 20);
+  push(`${now()} ─ Script execution finished.`, isDryRun ? 'c-warn' : 'c-success', 100);
+  push(`${now()} ─ Exit code: 0`, 'c-dim', 60);
+  push('', 'c-dim', 20);
+
+  return lines;
+}
+
+function getSimOutput(id, p, isDryRun, dryTag, now) {
+  const out = [];
+  const add = (text, cls = 'c-info', delay = 150) => out.push({ text, cls, delay });
+
+  switch (id) {
+    case 'create-user':
+      add(`${now()} ─ ${dryTag}Creating user: ${p.UPN || ''}`, 'c-info', 200);
+      add(`${now()} ─ ${dryTag}Setting display name: ${p.DisplayName || ''}`, 'c-dim');
+      if (p.Department) add(`${now()} ─ ${dryTag}Setting department: ${p.Department}`, 'c-dim');
+      if (p.LicenseSKU && p.LicenseSKU !== 'None') add(`${now()} ─ ${dryTag}Assigning licence: ${p.LicenseSKU}`, 'c-info', 200);
+      add(`${now()} ─ ${dryTag}Sending welcome email...`, 'c-dim', 180);
+      add(`${now()} ─ ${isDryRun?'Would create':'Created'} user ${p.UPN || ''} successfully ✓`, 'c-success', 300);
+      break;
+
+    case 'disable-user':
+      add(`${now()} ─ ${dryTag}Locating account: ${p.UPN || ''}`, 'c-info', 200);
+      add(`${now()} ─ ${dryTag}Revoking active sessions (SignInActivity)...`, 'c-dim', 250);
+      if (p.RevokeTokens) add(`${now()} ─ ${dryTag}Revoking all refresh tokens...`, 'c-dim', 200);
+      if (p.RemoveLicences) add(`${now()} ─ ${dryTag}Removing licence assignments...`, 'c-dim', 200);
+      if (p.ConvertShared) add(`${now()} ─ ${dryTag}Converting mailbox to Shared...`, 'c-dim', 250);
+      add(`${now()} ─ ${dryTag}Disabling account...`, 'c-dim', 200);
+      add(`${now()} ─ ${isDryRun?'Would disable':'Disabled'} ${p.UPN || ''} ✓`, 'c-success', 300);
+      break;
+
+    case 'mailbox-audit':
+      add(`${now()} ─ Querying audit log: ${p.UserPrincipalName || ''}`, 'c-info', 200);
+      add(`${now()} ─ Date range: ${p.StartDate || 'N/A'} → ${p.EndDate || 'N/A'}`, 'c-dim', 100);
+      add(`${now()} ─ Fetching records from Exchange Online...`, 'c-dim', 400);
+      add(`${now()} ─ Found 247 audit events in range`, 'c-info', 300);
+      add(`   ├─ SendAs: 12 events`, 'c-dim', 100);
+      add(`   ├─ MailItemsAccessed: 198 events`, 'c-dim', 80);
+      add(`   ├─ HardDelete: 8 events`, 'c-warn', 80);
+      add(`   └─ FolderBind: 29 events`, 'c-dim', 80);
+      if (p.ExportCSV) add(`${now()} ─ Exported to: MailboxAudit_${(p.UserPrincipalName||'user').split('@')[0]}_${p.StartDate || 'date'}.csv ✓`, 'c-success', 200);
+      break;
+
+    case 'licence-report':
+      add(`${now()} ─ Fetching tenant licence data...`, 'c-info', 300);
+      add(`${now()} ─ Processing SKUs...`, 'c-dim', 200);
+      add(`   ├─ Microsoft 365 E3:  450/500 assigned (90%)`, 'c-info', 100);
+      add(`   ├─ Microsoft 365 E5:   28/50  assigned (56%)`, 'c-info', 100);
+      add(`   ├─ Exchange Online P1:  12/12  assigned (100%) ⚠`, 'c-warn', 100);
+      add(`   └─ Power BI Pro:        15/20  assigned (75%)`, 'c-info', 100);
+      if (p.OutputFormat !== 'Console') add(`${now()} ─ Writing ${p.OutputFormat}...`, 'c-dim', 200);
+      if (p.OutputPath) add(`${now()} ─ Saved to: ${p.OutputPath}LicenceReport_${new Date().toISOString().slice(0,10)}.${p.OutputFormat==='CSV Export'?'csv':p.OutputFormat.toLowerCase()} ✓`, 'c-success', 200);
+      break;
+
+    case 'sp-site-create':
+      add(`${now()} ─ ${dryTag}Creating site: ${p.SiteTitle || ''}`, 'c-info', 250);
+      add(`${now()} ─ ${dryTag}URL: https://yourtenant.sharepoint.com/sites/${p.SiteAlias||''}`, 'c-dim', 150);
+      add(`${now()} ─ ${dryTag}Template: ${p.SiteType || ''}`, 'c-dim', 100);
+      add(`${now()} ─ ${dryTag}Provisioning... (this may take 30–90s in live mode)`, 'c-dim', isDryRun?200:1500);
+      add(`${now()} ─ ${isDryRun?'Would create':'Created'} site successfully ✓`, 'c-success', 300);
+      break;
+
+    default:
+      add(`${now()} ─ ${dryTag}Executing ${id}...`, 'c-info', 200);
+      add(`${now()} ─ ${dryTag}Processing...`, 'c-dim', 400);
+      add(`${now()} ─ ${isDryRun?'Dry run':'Execution'} complete ✓`, 'c-success', 300);
+  }
+
+  return out;
+}
+
+// ──────────────────────────────────────────────
+//  OUTPUT HELPERS
+// ──────────────────────────────────────────────
+function resetOutput() {
+  const c = document.getElementById('output-console');
+  c.innerHTML = `
+    <div class="console-line c-dim">── M365 Admin Hub Terminal ──</div>
+    <div class="console-line c-dim">Ready. Configure parameters and click Run Script.</div>
+  `;
+  document.getElementById('progress-wrap').style.display = 'none';
+  document.getElementById('output-status').textContent = 'idle';
+  document.getElementById('output-status').style.color = 'var(--text3)';
+}
+
+function clearOutput() {
+  document.getElementById('output-console').innerHTML = '';
+  document.getElementById('progress-wrap').style.display = 'none';
+}
+
+function copyOutput() {
+  const text = document.getElementById('output-console').innerText;
+  navigator.clipboard.writeText(text).then(() => toast('✓ Output copied to clipboard', 'success'));
+}
+
+// ──────────────────────────────────────────────
+//  KPI + DASHBOARD LOG
+// ──────────────────────────────────────────────
+function updateKPIs() {
+  document.getElementById('kpi-runs').textContent = stats.runs;
+  document.getElementById('kpi-success').textContent = stats.success;
+  document.getElementById('kpi-errors').textContent = stats.errors;
+  const pct = stats.runs > 0 ? Math.round((stats.success / stats.runs) * 100) : 0;
+  document.getElementById('kpi-success-pct').textContent = `${pct}% success rate`;
+}
+
+function addDashLog(m, isDryRun, success) {
+  const log = document.getElementById('dash-log');
+  const entry = document.createElement('div');
+  entry.className = 'log-entry';
+  const ts = new Date().toLocaleTimeString();
+  const tagCls = isDryRun ? 'tag-warning' : (success ? 'tag-success' : 'tag-error');
+  const tagTxt = isDryRun ? 'DRY RUN' : (success ? 'OK' : 'ERROR');
+  entry.innerHTML = `
+    <span class="log-time">${ts}</span>
+    <span class="log-msg">Ran <strong>${m.label}</strong> (${m.script})</span>
+    <span class="tag ${tagCls}">${tagTxt}</span>
+  `;
+  log.insertBefore(entry, log.firstChild);
+}
+
+// ──────────────────────────────────────────────
+//  HISTORY
+// ──────────────────────────────────────────────
+function renderHistory() {
+  const list = document.getElementById('history-list');
+  if (!runHistory.length) {
+    list.innerHTML = '<div style="font-size:12px;color:var(--text3);padding:20px 0;">No runs recorded yet.</div>';
+    return;
+  }
+  list.innerHTML = runHistory.map(h => `
+    <div class="history-item" onclick="replayHistory('${h.id}')">
+      <div style="width:8px;height:8px;border-radius:50%;background:${h.success?'var(--green)':'var(--red)'};flex-shrink:0"></div>
+      <div class="history-name">${h.label}</div>
+      <div class="history-ts">${new Date(h.ts).toLocaleString()}</div>
+      ${h.dryRun ? '<span class="tag tag-warning" style="font-size:9px;padding:1px 5px">DRY</span>' : ''}
+    </div>
+  `).join('');
+}
+
+function clearHistory() {
+  runHistory = [];
+  stats = { runs: 0, success: 0, errors: 0 };
+  localStorage.setItem('m365hub_history', '[]');
+  localStorage.setItem('m365hub_stats', JSON.stringify(stats));
+  updateKPIs();
+  renderHistory();
+  toast('History cleared', 'info');
+}
+
+function replayHistory(id) {
+  const entry = runHistory.find(h => h.id == id);
+  if (!entry) return;
+  const m = MODULES.find(x => x.script === entry.script);
+  if (m) { loadModule(m.id); toast('Module loaded. Review parameters and re-run.', 'info'); }
+}
+
+// ──────────────────────────────────────────────
+//  SETTINGS
+// ──────────────────────────────────────────────
+function saveSettings() {
+  toast('✓ Settings saved', 'success');
+}
+
+// ──────────────────────────────────────────────
+//  TOAST
+// ──────────────────────────────────────────────
+let toastTimeout = null;
+function toast(msg, type = 'info') {
+  const el = document.getElementById('toast');
+  const colors = { success: 'var(--green)', warn: 'var(--amber)', error: 'var(--red)', info: 'var(--accent2)' };
+  el.style.borderColor = colors[type] || 'var(--border2)';
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => el.classList.remove('show'), 3200);
+}
+
+// ──────────────────────────────────────────────
+//  RESIZER
+// ──────────────────────────────────────────────
+const resizer = document.getElementById('resizer');
+let isResizing = false;
+resizer.addEventListener('mousedown', e => {
+  isResizing = true;
+  document.body.style.cursor = 'col-resize';
+  document.body.style.userSelect = 'none';
+});
+document.addEventListener('mousemove', e => {
+  if (!isResizing) return;
+  const layout = document.querySelector('.script-layout');
+  const right = document.querySelector('.script-right');
+  if (!layout || !right) return;
+  const rect = layout.getBoundingClientRect();
+  const newRightWidth = rect.right - e.clientX;
+  if (newRightWidth > 200 && newRightWidth < 700) right.style.width = newRightWidth + 'px';
+});
+document.addEventListener('mouseup', () => {
+  isResizing = false;
+  document.body.style.cursor = '';
+  document.body.style.userSelect = '';
+});
+
+// ──────────────────────────────────────────────
+//  KEYBOARD SHORTCUTS
+// ──────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+    if (activeModuleId !== 'dashboard') runScript();
+  }
+  if (e.key === 'Escape') closeModal();
+});
+
+// ── BOOT ──
+init();
+</script>
+</body>
+</html>
